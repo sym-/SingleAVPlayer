@@ -8,9 +8,18 @@
 
 #import <UIKit/UIKit.h>
 #import "YMSlider.h"
+#import <AVFoundation/AVFoundation.h>
+
+@class YMAVPlayerView;
+
+typedef void (^VideoCompletedPlayingBlock) (YMAVPlayerView *videoPlayer);
 
 @interface YMAVPlayerView : UIView
 
 @property (copy, nonatomic) NSString *urlString;
+
+@property (nonatomic, copy) VideoCompletedPlayingBlock completedPlayingBlock;
+
+-(void)stop;
 
 @end

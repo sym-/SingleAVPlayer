@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1F60FB361CFB071C00E12A4F /* PlayerImages.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 1F60FB351CFB071C00E12A4F /* PlayerImages.bundle */; };
 		1F60FB471CFB136600E12A4F /* PlayerImages.bundle in Sources */ = {isa = PBXBuildFile; fileRef = 1F60FB351CFB071C00E12A4F /* PlayerImages.bundle */; };
+		1F67613E1D0E5A140023CE3A /* UIView+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F67613D1D0E5A140023CE3A /* UIView+Extension.m */; };
 		1FBE99341CF7FC910096B788 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE99331CF7FC910096B788 /* main.m */; };
 		1FBE99371CF7FC910096B788 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE99361CF7FC910096B788 /* AppDelegate.m */; };
 		1FBE993A1CF7FC910096B788 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE99391CF7FC910096B788 /* ViewController.m */; };
@@ -47,6 +48,8 @@
 
 /* Begin PBXFileReference section */
 		1F60FB351CFB071C00E12A4F /* PlayerImages.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = PlayerImages.bundle; sourceTree = "<group>"; };
+		1F67613C1D0E5A140023CE3A /* UIView+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Extension.h"; sourceTree = "<group>"; };
+		1F67613D1D0E5A140023CE3A /* UIView+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Extension.m"; sourceTree = "<group>"; };
 		1FBE992F1CF7FC910096B788 /* SingleAVPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SingleAVPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FBE99331CF7FC910096B788 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1FBE99351CF7FC910096B788 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -157,6 +160,8 @@
 				1FBE99731CF81CE50096B788 /* YMTableViewCell.xib */,
 				1FBE99761CF8256E0096B788 /* YMVideoModel.h */,
 				1FBE99771CF8256E0096B788 /* YMVideoModel.m */,
+				1F67613C1D0E5A140023CE3A /* UIView+Extension.h */,
+				1F67613D1D0E5A140023CE3A /* UIView+Extension.m */,
 				1FBE993B1CF7FC910096B788 /* Main.storyboard */,
 				1FBE99411CF7FC910096B788 /* Assets.xcassets */,
 				1FBE99431CF7FC910096B788 /* LaunchScreen.storyboard */,
@@ -392,6 +397,7 @@
 			files = (
 				1F60FB471CFB136600E12A4F /* PlayerImages.bundle in Sources */,
 				1FBE99701CF7FD200096B788 /* YMSlider.m in Sources */,
+				1F67613E1D0E5A140023CE3A /* UIView+Extension.m in Sources */,
 				1FBE99781CF8256E0096B788 /* YMVideoModel.m in Sources */,
 				1FBE996D1CF7FD0F0096B788 /* YMAVPlayerView.m in Sources */,
 				1FBE993A1CF7FC910096B788 /* ViewController.m in Sources */,

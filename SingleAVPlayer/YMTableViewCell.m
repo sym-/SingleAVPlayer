@@ -23,7 +23,6 @@ NSString *const BtnDeselectImage = @"TTplay.png";
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
-    [self.playOrPauseBtn setImage:[UIImage imageNamed:BtnSelectImage] forState:UIControlStateSelected];
     [self.playOrPauseBtn setImage:[UIImage imageNamed:BtnDeselectImage] forState:UIControlStateNormal];
     self.playOrPauseBtn.selected = NO;
     
@@ -61,17 +60,7 @@ NSString *const BtnDeselectImage = @"TTplay.png";
 }
 
 - (IBAction)playOrPause:(UIButton *)sender {
-    __block bool selected = sender.selected;
-    if (self.playOrPause) {
-        if (selected) {
-            self.playOrPause(kStop);
-        }
-        else{
-            self.playOrPause(kPlay);
-        }
-        
-        sender.selected = !selected;
-    }
+    self.playOrPause(self.model);
 }
 
 @end

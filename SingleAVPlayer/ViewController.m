@@ -10,7 +10,7 @@
 #import "YMTableViewCell.h"
 #import "AFNetworking.h"
 #import "YMVideoModel.h"
-#import "YMAVPlayerManager.h";
+#import "YMAVPlayerManager.h"
 
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
 
@@ -77,18 +77,17 @@ static NSString *const cellIdentifier = @"YMCELL";
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
-    YMTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+    __weak YMTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     cell.model = self.sourceArr[indexPath.row];
     
     __weak typeof(self) weakSelf = self;
-    cell.playOrPause = ^(PlayerState state){
+    cell.playOrPause = ^(YMVideoModel *model){
         YMAVPlayerManager *manager = [YMAVPlayerManager sharedInstance];
-        if (state == kPlay) {
-            
+        if ([manager videoPlayerViewExisted]) {
+            [manager destroyPlayerView];
         }
-        else if (state == kStop){
-            
-        }
+        manager.url = model.mp4_url;
+        [manager showVideoPlayerViewInView:cell.contentView frame:cell.bgImage.frame];
     };
     
     return cell;

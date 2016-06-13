@@ -11,19 +11,15 @@
 
 @interface YMAVPlayerManager : NSObject
 
+@property (copy, nonatomic) NSString *url;
+
 +(instancetype)sharedInstance;
 
--(void)play;
+-(BOOL)videoPlayerViewExisted;
 
--(void)pause;
+-(void)showVideoPlayerViewInView:(UIView *)view frame:(CGRect)frame;
 
--(void)show;
-
--(void)destroy;
-
--(void)videoURL;
-
-@property (strong, nonatomic) YMAVPlayerView *playerView;
+-(void)destroyPlayerView;
 
 
 @end

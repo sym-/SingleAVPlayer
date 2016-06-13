@@ -42,7 +42,7 @@
         
         //检验
         id varValue = object_getIvar(self, var);
-        NSLog(@"类名:%@{%s *%@=%@}---字典里值:%@", [self class], varName, key, varValue, value);
+//        NSLog(@"类名:%@{%s *%@=%@}---字典里值:%@", [self class], varName, key, varValue, value);
         
     }
 }

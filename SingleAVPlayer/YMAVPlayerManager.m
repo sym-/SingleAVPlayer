@@ -13,12 +13,20 @@
 {
     
 }
-
+@property (strong, nonatomic) YMAVPlayerView *playerView;
 @end
 
 @implementation YMAVPlayerManager
 
 static YMAVPlayerManager *manager;
+
+-(void)setUrl:(NSString *)url{
+    _url = url;
+    if (_playerView) {
+        [self destroyPlayerView];
+    }
+    self.playerView.urlString = url;
+}
 
 +(instancetype)sharedInstance{
     static dispatch_once_t onceToken;
@@ -50,6 +58,25 @@ static YMAVPlayerManager *manager;
     }
     
     return _playerView;
+}
+
+-(void)showVideoPlayerViewInView:(UIView *)view frame:(CGRect)frame{
+    NSAssert(self.url != nil, @"必须先传入视频url！！！");
+    self.playerView.frame = frame;
+    [view addSubview:self.playerView];
+}
+
+-(void)destroyPlayerView{
+    [self.playerView stop];
+    _playerView = nil;
+}
+
+-(BOOL)videoPlayerViewExisted{
+    if (_playerView) {
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark -app生命周期

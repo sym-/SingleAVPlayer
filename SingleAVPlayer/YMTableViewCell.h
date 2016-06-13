@@ -14,7 +14,7 @@ typedef NS_ENUM(NSInteger, PlayerState) {
     kStop
 };
 
-typedef void (^playOrPause) (PlayerState state);
+typedef void (^playOrPause) (YMVideoModel *model);
 
 extern NSString *const BtnSelectImage;
 
