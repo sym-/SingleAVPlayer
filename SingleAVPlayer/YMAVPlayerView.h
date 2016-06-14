@@ -18,8 +18,20 @@ typedef void (^VideoCompletedPlayingBlock) (YMAVPlayerView *videoPlayer);
 
 @property (copy, nonatomic) NSString *urlString;
 
+@property (nonatomic, assign) BOOL inBackground;
+
 @property (nonatomic, copy) VideoCompletedPlayingBlock completedPlayingBlock;
 
 -(void)stop;
+
+-(void)play;
+
+-(void)pause;
+
+- (void)orientationLeftFullScreen;
+
+- (void)orientationRightFullScreen;
+
+- (void)smallScreen;
 
 @end

@@ -29,12 +29,18 @@ NSString *const BtnDeselectImage = @"TTplay.png";
     _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction)];
     [self.bgImage setUserInteractionEnabled:YES];
     [self.bgImage addGestureRecognizer:_tap];
+    [self.bgImage setContentMode:UIViewContentModeScaleAspectFit];
+    [self.bgImage setBackgroundColor:[UIColor blackColor]];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
 
     // Configure the view for the selected state
+    UIView *bgView = [[UIView alloc] init];
+    bgView.frame = self.bgImage.frame;
+    bgView.backgroundColor = [UIColor blackColor];
+    [self.backgroundView addSubview:bgView];
 }
 
 -(void)setModel:(YMVideoModel *)model{

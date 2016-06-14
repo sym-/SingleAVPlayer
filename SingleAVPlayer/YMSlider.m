@@ -70,6 +70,10 @@ static CGFloat PanDistance;
     CGPathRelease(pointPath);
 }
 
+-(void)dealloc{
+    NSLog(@"slider delegate dealloc");
+}
+
 @end
 
 @interface YMSlider (){
@@ -252,6 +256,7 @@ static CGFloat PanDistance;
 - (void)dealloc {
     [self removeObserver:self forKeyPath:@"value"];
     [self removeObserver:self forKeyPath:@"middleValue"];
+    PanDistance = 0.0;
     NSLog(@"slider -- dealloc");
 }
 

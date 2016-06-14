@@ -8,10 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "YMAVPlayerView.h"
+#import "YMVideoModel.h"
 
 @interface YMAVPlayerManager : NSObject
 
-@property (copy, nonatomic) NSString *url;
+@property (nonatomic, strong) YMVideoModel *videoModel;
 
 +(instancetype)sharedInstance;
 

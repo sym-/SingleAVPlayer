@@ -31,6 +31,10 @@ static const CGFloat BottomOpacity = 0.7;
 
 @property (strong, nonatomic) AVPlayerLayer *playerLayer;
 
+@property (strong, nonatomic) id progressObserver;
+
+@property (strong, nonatomic) UIWindow *keyWindow;
+
 //UI
 @property (strong, nonatomic) UIButton *playOrPauseBtn;
 
@@ -46,9 +50,19 @@ static const CGFloat BottomOpacity = 0.7;
 
 @property (strong, nonatomic) UIActivityIndicatorView *indicatorView;
 
+@property (strong, nonatomic) UIView *blindView;
+
 @property (assign, nonatomic) CGRect originFrame;
 
 @property (assign, nonatomic) CGFloat current;
+
+@property (assign, nonatomic) CGFloat total;
+
+@property (assign, nonatomic) BOOL inOperation;
+
+@property (assign, nonatomic) BOOL notInitialFrame;
+
+@property (assign, nonatomic) AVPlayerStatus currentStatus;
 
 @end
 
@@ -56,7 +70,7 @@ static const CGFloat BottomOpacity = 0.7;
 
 -(id)init{
     if (self = [super init]) {
-        UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showOrHideBottomBar)];
+        UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showOrHideBottomView)];
         [self addGestureRecognizer:tapRecognizer];
         
         [self addSubview:self.playOrPauseBtn];
@@ -70,20 +84,82 @@ static const CGFloat BottomOpacity = 0.7;
 -(void)layoutSubviews{
     [super layoutSubviews];
     
-    //设置frame
-    self.originFrame = self.frame;
+    //初始化设置frame
+    if (!_notInitialFrame) {
+        self.originFrame = self.frame;        
+        self.bottomView.frame = CGRectMake(0, self.frame.size.height-BottomViewHeight, self.frame.size.width ,BottomViewHeight);
+        self.playOrPauseBtn.frame = CGRectMake((self.frame.size.width - PlayOrPauseBtnSize) / 2, (self.frame.size.height - PlayOrPauseBtnSize) / 2, PlayOrPauseBtnSize, PlayOrPauseBtnSize);
+        self.indicatorView.center = CGPointMake(CGRectGetWidth(self.frame)/2, CGRectGetHeight(self.frame)/2);
+        
+        _notInitialFrame = YES;
+    }
     self.playerLayer.frame = self.bounds;
-    self.bottomView.frame = CGRectMake(0, self.frame.size.height-BottomViewHeight, self.frame.size.width ,BottomViewHeight);
-    self.playOrPauseBtn.frame = CGRectMake((self.frame.size.width - PlayOrPauseBtnSize) / 2, (self.frame.size.height - PlayOrPauseBtnSize) / 2, PlayOrPauseBtnSize, PlayOrPauseBtnSize);
-    self.indicatorView.center = CGPointMake(CGRectGetWidth(self.frame)/2, CGRectGetHeight(self.frame)/2);
-}
-
--(void)showOrHideBottomBar{
-    
 }
 
 -(void)scaleView:(UIButton *)btn{
+    if (!btn.selected) {
+        [self orientationLeftFullScreen];
+//        [self orientationRightFullScreen];
+    }
+    else{
+        [self smallScreen];
+    }
     btn.selected = !btn.selected;
+}
+
+- (void)orientationLeftFullScreen {
+    self.blindView = self.superview;
+    [self.keyWindow addSubview:self];    
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.transform = CGAffineTransformMakeRotation(M_PI / 2);
+        self.frame = self.keyWindow.bounds;
+        
+        self.bottomView.frame = CGRectMake(0, self.keyWindow.bounds.size.width - BottomViewHeight, self.keyWindow.bounds.size.height, BottomViewHeight);
+        self.playOrPauseBtn.frame = CGRectMake((self.keyWindow.bounds.size.height - PlayOrPauseBtnSize) / 2, (self.keyWindow.bounds.size.width - PlayOrPauseBtnSize) / 2, PlayOrPauseBtnSize, PlayOrPauseBtnSize);
+        self.indicatorView.center = CGPointMake(self.keyWindow.bounds.size.height / 2, self.keyWindow.bounds.size.width / 2);
+        [self updateConstraintsIfNeeded];
+    }];
+    
+    [self setStatusBarHidden:YES];
+    [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIDeviceOrientationLandscapeLeft] forKey:@"orientation"];
+
+}
+
+- (void)orientationRightFullScreen {
+    self.blindView = self.superview;
+    [self.keyWindow addSubview:self];
+    
+    [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIDeviceOrientationLandscapeRight] forKey:@"orientation"];
+    
+    [self updateConstraintsIfNeeded];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.transform = CGAffineTransformMakeRotation(-M_PI / 2);
+        self.frame = self.keyWindow.bounds;
+        self.bottomView.frame = CGRectMake(0, self.keyWindow.bounds.size.width - BottomViewHeight, self.keyWindow.bounds.size.height, BottomViewHeight);
+        self.playOrPauseBtn.frame = CGRectMake((self.keyWindow.bounds.size.height - PlayOrPauseBtnSize) / 2, (self.keyWindow.bounds.size.width - PlayOrPauseBtnSize) / 2, PlayOrPauseBtnSize, PlayOrPauseBtnSize);
+        self.indicatorView.center = CGPointMake(self.keyWindow.bounds.size.height / 2, self.keyWindow.bounds.size.width / 2);
+    }];
+    [self setStatusBarHidden:YES];
+}
+
+- (void)smallScreen {
+    if (self.blindView) {
+        [self.blindView addSubview:self];
+        self.blindView = nil;
+    }
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.transform = CGAffineTransformMakeRotation(0);
+        self.frame = self.originFrame;
+        self.bottomView.frame = CGRectMake(0, self.originFrame.size.height - BottomViewHeight, self.self.originFrame.size.width, BottomViewHeight);
+        self.playOrPauseBtn.frame = CGRectMake((self.originFrame.size.width - PlayOrPauseBtnSize) / 2, (self.originFrame.size.height - PlayOrPauseBtnSize) / 2, PlayOrPauseBtnSize, PlayOrPauseBtnSize);
+        self.indicatorView.center = CGPointMake(self.originFrame.size.width / 2, self.originFrame.size.height / 2);
+        [self updateConstraintsIfNeeded];
+    }];
+    [self setStatusBarHidden:NO];
+    [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger:UIDeviceOrientationPortrait] forKey:@"orientation"];
 }
 
 -(void)play{
@@ -95,10 +171,14 @@ static const CGFloat BottomOpacity = 0.7;
 }
 
 -(void)stop{
-    [self.player pause];
+    [self pause];
     [self.player.currentItem cancelPendingSeeks];
     [self.player.currentItem.asset cancelLoading];
+    
+    self.current = 0.0;
+    self.total = 0.0;
     self.slider.value = 0.0;
+    self.blindView = nil;
     
     [self removeFromSuperview];
 }
@@ -129,12 +209,12 @@ static const CGFloat BottomOpacity = 0.7;
     __weak typeof(self) weakSelf = self;
     
     //Set once per second
-    [self.player addPeriodicTimeObserverForInterval:CMTimeMake(1.0f, 1.0f) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+    self.progressObserver = [self.player addPeriodicTimeObserverForInterval:CMTimeMake(1.0f, 1.0f) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
         
         float current = CMTimeGetSeconds(time);
         weakSelf.current = current;
         float total = CMTimeGetSeconds([playerItem duration]);
-        weakSelf.progressLabel.text = [weakSelf timeFormatted:current];
+        weakSelf.total = total;
         if (current) {
             weakSelf.slider.value = current / total;
             if (weakSelf.slider.value == 1.0f) {      //complete block
@@ -144,9 +224,10 @@ static const CGFloat BottomOpacity = 0.7;
                         weakSelf.completedPlayingBlock(weakSelf);
                     }
                     weakSelf.completedPlayingBlock = nil;
-                }else {       //finish and loop playback
+                }
+                else {       //finish and loop playback
                     weakSelf.playOrPauseBtn.selected = NO;
-                    [weakSelf showOrHidenBar];
+                    [weakSelf showOrHideBottomView];
                     CMTime currentCMTime = CMTimeMake(0, 1);
                     [weakSelf.player seekToTime:currentCMTime completionHandler:^(BOOL finished) {
                         weakSelf.slider.value = 0.0f;
@@ -167,6 +248,13 @@ static const CGFloat BottomOpacity = 0.7;
         if(status == AVPlayerStatusReadyToPlay){
             CGFloat totalDuration = CMTimeGetSeconds(playerItem.duration);
             self.totalTimeLabel.text = [self timeFormatted:totalDuration];
+            [self showOrHideBottomView];
+            [self hideIndicator];
+            self.playOrPauseBtn.selected = YES;
+            self.currentStatus = AVPlayerStatusReadyToPlay;
+        }
+        else{
+            self.currentStatus = AVPlayerStatusUnknown;
         }
     }
     else if([keyPath isEqualToString:@"loadedTimeRanges"]){
@@ -180,35 +268,128 @@ static const CGFloat BottomOpacity = 0.7;
         //loading animation
         if (self.slider.middleValue  <= self.slider.value || (totalBuffer - 1.0) < self.current) {
             NSLog(@"正在缓冲...");
-//            self.activityIndicatorView.hidden = NO;
-            //            self.activityIndicatorView.center = self.center;
-//            [self.activityIndicatorView startAnimating];
-        }else {
-//            self.activityIndicatorView.hidden = YES;
-            if (self.playOrPauseBtn.selected) {
-                [self.player play];
+            [self showIndicator];
+        }
+        else {
+            [self hideIndicator];
+            if (self.playOrPauseBtn.selected && !self.inBackground) {
+                [self play];
             }
         }
     }
 }
 
-#pragma mark - status hiden
+#pragma mark - status/title and bottom hiden
 - (void)setStatusBarHidden:(BOOL)hidden {
     UIView *statusBar = [[[UIApplication sharedApplication] valueForKey:@"statusBarWindow"] valueForKey:@"statusBar"];
     statusBar.hidden = hidden;
 }
 
-- (void)showOrHidenBar {
-//    if (self.barHiden) {
-//        [self show];
-//    }else {
-//        [self hiden];
-//    }
+- (void)showOrHideBottomView {
+    if (self.bottomView.hidden) {
+        [self showBottomViewAndTitle];
+    }else {
+        [self hideBottomViewAndTitle];
+    }
 }
+
+-(void)showBottomViewAndTitle{
+    self.bottomView.hidden = NO;
+    if (self.currentStatus == AVPlayerStatusReadyToPlay) {
+        self.playOrPauseBtn.hidden = NO;
+    }
+    
+    [UIView animateWithDuration:BottomViewAnimationTime animations:^{
+        self.bottomView.layer.opacity = 1.0;
+        if (self.currentStatus == AVPlayerStatusReadyToPlay) {
+            self.playOrPauseBtn.layer.opacity = 1.0;
+        }
+        
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self performBlock:^{
+                if (!self.self.bottomView.hidden && !self.inOperation) {
+                    [self hideBottomViewAndTitle];
+                }
+            } afterDelay:BottomViewShowTime];
+        }
+    }];
+}
+
+-(void)hideBottomViewAndTitle{
+    self.inOperation = NO;
+    [UIView animateWithDuration:BottomViewAnimationTime animations:^{
+        self.bottomView.layer.opacity = 0.0f;
+        self.playOrPauseBtn.layer.opacity = 0.0f;
+    } completion:^(BOOL finished){
+        if (finished) {
+            self.playOrPauseBtn.hidden = YES;
+            self.bottomView.hidden = YES;
+        }
+    }];
+}
+
+-(void)showIndicator{
+    self.indicatorView.hidden = NO;
+    self.indicatorView.center = self.center;
+    [self.indicatorView startAnimating];
+    self.playOrPauseBtn.opaque = 0.0;
+    self.playOrPauseBtn.hidden = YES;
+}
+
+-(void)hideIndicator{
+    [self.indicatorView stopAnimating];
+    self.indicatorView.hidden = YES;
+    self.playOrPauseBtn.opaque = 1.0;
+    self.playOrPauseBtn.hidden = NO;
+}
+
+- (void)performBlock:(void (^)(void))block afterDelay:(NSTimeInterval)delay {
+    [self performSelector:@selector(callBlockAfterDelay:) withObject:block afterDelay:delay];
+}
+
+- (void)callBlockAfterDelay:(void (^)(void))block {
+    block();
+}
+
+#pragma mark slider call back
+- (void)sliderValueChange:(YMSlider *)slider {
+    NSString *time = [self timeFormatted:slider.value * self.total];
+    NSLog(@"time:%f",[self.totalTimeLabel.text doubleValue]);
+    self.progressLabel.text = time;
+}
+
+- (void)finishChange {
+    self.inOperation = NO;
+    [self performBlock:^{
+        if (!self.bottomView.hidden && !self.inOperation) {
+            [self hideBottomViewAndTitle];
+        }
+    } afterDelay:BottomViewShowTime];
+    
+    [self pause];
+    
+    CMTime currentCMTime = CMTimeMake(self.slider.value * self.total, 1);
+    if (self.slider.middleValue) {
+        [self.player seekToTime:currentCMTime completionHandler:^(BOOL finished) {
+            [self play];
+            self.playOrPauseBtn.selected = YES;
+        }];
+    }
+}
+
+//Dragging the thumb to suspend video playback
+- (void)dragSlider {
+    self.inOperation = YES;
+    [self.player pause];
+}
+
 
 -(void)dealloc{
     [self.playerItem removeObserver:self forKeyPath:@"status"];
     [self.playerItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [self.player removeTimeObserver:self.progressObserver];
+    
     NSLog(@"playerview -- dealloc");
 }
 
@@ -226,12 +407,13 @@ static const CGFloat BottomOpacity = 0.7;
     _urlString = urlString;
     [self.layer insertSublayer:self.playerLayer atIndex:0];
     [self play];
+    [self showIndicator];
 }
 
 -(UIView *)bottomView{
     if (!_bottomView) {
         _bottomView = [[UIView alloc] init];
-        _bottomView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+        _bottomView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:BottomOpacity];
         
         //progress label
         UILabel *progress = [[UILabel alloc] init];
@@ -251,9 +433,19 @@ static const CGFloat BottomOpacity = 0.7;
         }];
         
         //slider
+        __weak typeof(self) weakSelf = self;
         YMSlider *slider = [[YMSlider alloc] init];
         slider.translatesAutoresizingMaskIntoConstraints = NO;
         [_bottomView addSubview:slider];
+        slider.draggingSliderBlock = ^(YMSlider *slider){
+            [weakSelf dragSlider];
+        };
+        slider.finishChangeBlock = ^(YMSlider *slider){
+            [weakSelf finishChange];
+        };
+        slider.valueChangeBlock = ^(YMSlider *slider){
+            [weakSelf sliderValueChange:slider];
+        };
         self.slider = slider;
         [slider mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(progress.mas_right).with.offset(10);
@@ -318,7 +510,6 @@ static const CGFloat BottomOpacity = 0.7;
 -(UIActivityIndicatorView *)indicatorView{
     if (!_indicatorView) {
         _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-        
     }
     
     return _indicatorView;
@@ -371,6 +562,14 @@ static const CGFloat BottomOpacity = 0.7;
         
     }
     return _playerLayer;
+}
+
+-(UIWindow *)keyWindow{
+    if (!_keyWindow) {
+        _keyWindow = [[UIApplication sharedApplication] keyWindow];
+    }
+    
+    return _keyWindow;
 }
 
 @end

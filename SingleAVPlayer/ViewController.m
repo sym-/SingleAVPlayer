@@ -11,6 +11,7 @@
 #import "AFNetworking.h"
 #import "YMVideoModel.h"
 #import "YMAVPlayerManager.h"
+#import "YMAVPlayerView.h"
 
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
 
@@ -80,13 +81,13 @@ static NSString *const cellIdentifier = @"YMCELL";
     __weak YMTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     cell.model = self.sourceArr[indexPath.row];
     
-    __weak typeof(self) weakSelf = self;
+//    __weak typeof(self) weakSelf = self;
     cell.playOrPause = ^(YMVideoModel *model){
         YMAVPlayerManager *manager = [YMAVPlayerManager sharedInstance];
         if ([manager videoPlayerViewExisted]) {
             [manager destroyPlayerView];
         }
-        manager.url = model.mp4_url;
+        manager.videoModel = model;
         [manager showVideoPlayerViewInView:cell.contentView frame:cell.bgImage.frame];
     };
     
@@ -100,5 +101,20 @@ static NSString *const cellIdentifier = @"YMCELL";
     
     
 }
+
+-(void)tableView:(UITableView *)tableView didEndDisplayingCell:(nonnull UITableViewCell *)cell forRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    dispatch_async(dispatch_get_global_queue(0, DISPATCH_QUEUE_PRIORITY_DEFAULT), ^{
+        [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:[YMAVPlayerView class] ]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[YMAVPlayerManager sharedInstance] destroyPlayerView];
+                });                
+            }
+        }];
+    });
+}
+
+
 
 @end
